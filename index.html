@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keycap — Typing Trainer</title>
+<meta name="description" content="Тренажери навиштани клавиатура — Practice, Lessons, Speed Test, статистика ва геймификатсия.">
+<meta name="theme-color" content="#1B1D22">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="case" id="case">
+
+  <!-- ================= TOP BAR ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-key" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor" opacity="0.14"/>
+        <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Keycap</span>
+    </div>
+
+    <nav class="modes" id="modeNav" role="tablist" aria-label="Mode">
+      <button class="mode-btn" data-mode="lessons" role="tab" aria-selected="true">01 <span data-i18n="mode_lessons">Lessons</span></button>
+      <button class="mode-btn" data-mode="practice" role="tab" aria-selected="false">02 <span data-i18n="mode_practice">Practice</span></button>
+      <button class="mode-btn" data-mode="speed" role="tab" aria-selected="false">03 <span data-i18n="mode_speed">Speed Test</span></button>
+      <button class="mode-btn" data-mode="custom" role="tab" aria-selected="false">04 <span data-i18n="mode_custom">Custom</span></button>
+    </nav>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="statsBtn" title="Statistics" data-i18n-title="nav_stats">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4 20V10M11 20V4M18 20v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" id="gamifyBtn" title="XP & Achievements" data-i18n-title="nav_gamify">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.6 19.3l1.3-6-4.6-4.1 6.1-.6L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" data-i18n-title="nav_settings">
+        <svg viewBox="0 0 24 24" width="19" height="19"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13a7.6 7.6 0 000-2l2-1.5-2-3.4-2.4.7a7.7 7.7 0 00-1.7-1L14.8 3H9.2l-.5 2.8a7.7 7.7 0 00-1.7 1l-2.4-.7-2 3.4L4.6 11a7.6 7.6 0 000 2l-2 1.5 2 3.4 2.4-.7a7.7 7.7 0 001.7 1l.5 2.8h5.6l.5-2.8a7.7 7.7 0 001.7-1l2.4.7 2-3.4-2-1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="fullscreenBtn" title="Fullscreen (F)" data-i18n-title="nav_fullscreen">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN STAGE ================= -->
+  <main class="stage">
+
+    <!-- Lesson picker (only in lessons mode) -->
+    <div class="lesson-rail" id="lessonRail" aria-label="Lessons"></div>
+
+    <!-- Live stat strip -->
+    <div class="stat-strip" id="statStrip">
+      <div class="stat-chip"><span class="stat-val" id="liveWpm">0</span><span class="stat-lbl" data-i18n="wpm">WPM</span></div>
+      <div class="stat-chip"><span class="stat-val" id="liveCpm">0</span><span class="stat-lbl" data-i18n="cpm">CPM</span></div>
+      <div class="stat-chip"><span class="stat-val" id="liveAcc">100%</span><span class="stat-lbl" data-i18n="accuracy">Accuracy</span></div>
+      <div class="stat-chip"><span class="stat-val" id="liveErr">0</span><span class="stat-lbl" data-i18n="errors">Errors</span></div>
+      <div class="stat-chip timer-chip"><span class="stat-val" id="liveTimer">—</span><span class="stat-lbl" data-i18n="timer">Timer</span></div>
+      <div class="stat-chip"><span class="stat-val" id="liveWords">0/0</span><span class="stat-lbl" data-i18n="words">Words</span></div>
+    </div>
+
+    <!-- Test duration / length picker (speed mode) -->
+    <div class="length-picker" id="lengthPicker">
+      <span class="lp-label" data-i18n="duration">Duration</span>
+      <button class="lp-btn" data-dur="15">15s</button>
+      <button class="lp-btn" data-dur="30">30s</button>
+      <button class="lp-btn active" data-dur="60">60s</button>
+      <button class="lp-btn" data-dur="120">120s</button>
+      <span class="lp-sep">/</span>
+      <button class="lp-btn" data-words="25">25 <span data-i18n="wordsShort">w</span></button>
+      <button class="lp-btn" data-words="50">50 <span data-i18n="wordsShort">w</span></button>
+      <button class="lp-btn" data-words="100">100 <span data-i18n="wordsShort">w</span></button>
+    </div>
+
+    <!-- Custom text input -->
+    <div class="custom-box" id="customBox">
+      <textarea id="customText" rows="4" data-i18n-placeholder="custom_placeholder" placeholder="Матни худро гузоред..."></textarea>
+      <button class="btn-primary" id="customStart" data-i18n="use_text">Use this text</button>
+    </div>
+
+    <!-- Typing keycap area -->
+    <div class="typing-wrap">
+      <div class="typing-area" id="typingArea" tabindex="0">
+        <div class="type-text" id="typeText"></div>
+      </div>
+      <input type="text" id="hiddenInput" class="hidden-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="typing input">
+      <div class="focus-hint" id="focusHint" data-i18n="focus_hint">Click here or start typing to begin</div>
+    </div>
+
+    <!-- Result panel -->
+    <div class="result-panel" id="resultPanel">
+      <h2 data-i18n="result_title">Test complete</h2>
+      <div class="result-grid">
+        <div class="result-cell"><span class="rv" id="resWpm">0</span><span class="rl" data-i18n="wpm">WPM</span></div>
+        <div class="result-cell"><span class="rv" id="resCpm">0</span><span class="rl" data-i18n="cpm">CPM</span></div>
+        <div class="result-cell"><span class="rv" id="resAcc">0%</span><span class="rl" data-i18n="accuracy">Accuracy</span></div>
+        <div class="result-cell"><span class="rv" id="resErr">0</span><span class="rl" data-i18n="errors">Errors</span></div>
+        <div class="result-cell"><span class="rv" id="resTime">0s</span><span class="rl" data-i18n="timer">Time</span></div>
+        <div class="result-cell"><span class="rv" id="resXp">+0</span><span class="rl" data-i18n="xp_gained">XP</span></div>
+      </div>
+      <div class="result-note" id="resultNote"></div>
+      <div class="result-actions">
+        <button class="btn-primary" id="restartBtn" data-i18n="restart">Restart · Tab</button>
+        <button class="btn-ghost" id="nextBtn" data-i18n="next">Next</button>
+      </div>
+    </div>
+
+    <!-- Virtual keyboard + finger guide -->
+    <div class="kb-wrap">
+      <div class="keyboard" id="keyboard"></div>
+      <div class="finger-guide" id="fingerGuide"></div>
+    </div>
+
+    <p class="shortcuts-hint">
+      <span data-i18n="sc_tab">Tab</span> — <span data-i18n="sc_restart">restart</span> ·
+      <span data-i18n="sc_esc">Esc</span> — <span data-i18n="sc_stop">stop</span> ·
+      <span>F</span> — <span data-i18n="sc_fullscreen">fullscreen</span>
+    </p>
+  </main>
+</div>
+
+<!-- ================= STATS DRAWER ================= -->
+<aside class="drawer" id="statsDrawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h2 data-i18n="stats_title">Statistics</h2>
+    <button class="icon-btn close-drawer" data-close="statsDrawer">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="range-tabs" id="rangeTabs">
+      <button class="range-btn active" data-range="daily" data-i18n="range_daily">Daily</button>
+      <button class="range-btn" data-range="weekly" data-i18n="range_weekly">Weekly</button>
+      <button class="range-btn" data-range="monthly" data-i18n="range_monthly">Monthly</button>
+    </div>
+    <canvas id="wpmChart" width="520" height="180"></canvas>
+    <p class="chart-cap" data-i18n="chart_wpm">WPM over time</p>
+    <canvas id="accChart" width="520" height="140"></canvas>
+    <p class="chart-cap" data-i18n="chart_acc">Accuracy over time</p>
+
+    <div class="totals-grid" id="totalsGrid"></div>
+
+    <h3 data-i18n="history_title">Test history</h3>
+    <div class="history-table-wrap">
+      <table class="history-table" id="historyTable"><thead>
+        <tr>
+          <th data-i18n="th_date">Date</th><th>WPM</th><th data-i18n="accuracy">Acc</th><th data-i18n="th_mode">Mode</th>
+        </tr>
+      </thead><tbody></tbody></table>
+    </div>
+
+    <h3 data-i18n="data_title">Data</h3>
+    <div class="data-actions">
+      <button class="btn-ghost" id="exportBtn" data-i18n="export">Export</button>
+      <label class="btn-ghost file-label" data-i18n="import">Import<input type="file" id="importInput" accept="application/json" hidden></label>
+      <button class="btn-danger" id="resetBtn" data-i18n="reset">Reset progress</button>
+    </div>
+    <p class="offline-note" id="offlineNote"></p>
+  </div>
+</aside>
+
+<!-- ================= GAMIFICATION DRAWER ================= -->
+<aside class="drawer" id="gamifyDrawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h2 data-i18n="gamify_title">Progress</h2>
+    <button class="icon-btn close-drawer" data-close="gamifyDrawer">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="level-card">
+      <div class="level-ring">
+        <svg viewBox="0 0 100 100" width="88" height="88">
+          <circle cx="50" cy="50" r="42" stroke="var(--surface-2)" stroke-width="9" fill="none"/>
+          <circle id="levelArc" cx="50" cy="50" r="42" stroke="var(--accent)" stroke-width="9" fill="none" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+        </svg>
+        <span class="level-num" id="levelNum">1</span>
+      </div>
+      <div class="level-info">
+        <div class="level-title"><span data-i18n="level">Level</span> <span id="levelLabel">1</span></div>
+        <div class="xp-label"><span id="xpNow">0</span> / <span id="xpNext">100</span> XP</div>
+        <div class="streak-row">🔥 <span id="streakNum">0</span> <span data-i18n="streak_days">day streak</span></div>
+      </div>
+    </div>
+
+    <div class="daily-goal">
+      <div class="dg-head"><span data-i18n="daily_goal">Daily goal</span><span id="dgProgress">0/3</span></div>
+      <div class="dg-bar"><div class="dg-fill" id="dgFill"></div></div>
+    </div>
+
+    <h3 data-i18n="achievements">Achievements</h3>
+    <div class="achv-grid" id="achvGrid"></div>
+
+    <h3 data-i18n="leaderboard">Personal leaderboard</h3>
+    <p class="lb-note" data-i18n="lb_note">Local, on this device only — your all-time best runs.</p>
+    <table class="history-table" id="leaderTable"><thead><tr><th data-i18n="th_mode">Mode</th><th>WPM</th><th data-i18n="accuracy">Acc</th><th data-i18n="th_date">Date</th></tr></thead><tbody></tbody></table>
+  </div>
+</aside>
+
+<!-- ================= SETTINGS DRAWER ================= -->
+<aside class="drawer" id="settingsDrawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h2 data-i18n="settings_title">Settings</h2>
+    <button class="icon-btn close-drawer" data-close="settingsDrawer">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <div class="setting-row">
+      <label data-i18n="s_language">Language</label>
+      <select id="setLang">
+        <option value="tg">Тоҷикӣ</option>
+        <option value="ru">Русский</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_layout">Keyboard layout</label>
+      <select id="setLayout">
+        <option value="qwerty">QWERTY</option>
+        <option value="azerty">AZERTY</option>
+        <option value="qwertz">QWERTZ</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_theme">Theme</label>
+      <div class="seg" id="setTheme">
+        <button data-val="dark" class="active" data-i18n="theme_dark">Dark</button>
+        <button data-val="light" data-i18n="theme_light">Light</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_sound">Sound</label>
+      <label class="switch"><input type="checkbox" id="setSound" checked><span class="slider"></span></label>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_cursor">Cursor style</label>
+      <select id="setCursor">
+        <option value="block" data-i18n="cursor_block">Block</option>
+        <option value="line" data-i18n="cursor_line">Line</option>
+        <option value="underline" data-i18n="cursor_underline">Underline</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_font">Font size</label>
+      <input type="range" id="setFont" min="16" max="36" value="22">
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_finger">Finger guide</label>
+      <label class="switch"><input type="checkbox" id="setFinger" checked><span class="slider"></span></label>
+    </div>
+
+    <div class="setting-row">
+      <label data-i18n="s_offline">Offline mode (PWA)</label>
+      <button class="btn-ghost" id="installBtn" data-i18n="install_app">Install app</button>
+    </div>
+
+  </div>
+</aside>
+
+<div class="scrim" id="scrim"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
